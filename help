@@ -37,6 +37,8 @@ infect zmq front
 mkdir ~/orwell
 cd ~/orwell/
 git clone http://github.com/dchilot/proxy-simulator.git
+git submodule init
+git submodule update
 virtualenv venv
 deactivate
 source venv/bin/activate
