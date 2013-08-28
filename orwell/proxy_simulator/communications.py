@@ -139,17 +139,30 @@ class LocalEventDispatcher(Broadcaster):
 
 
 class CombinedDispatcher(Broadcaster):
+    """
+    This is a hub which will at each step dispatch pygame events to
+    event handlers and receive messages which it will broadcast.
+    """
     def __init__(self, receiver_socket):
+        """
+        `receiver_socket`: zmq socket used to receive messages.
+        """
         super(CombinedDispatcher, self).__init__()
         self._event_handlers = []
         self._receiver_socket = receiver_socket
         self._string = None
 
     def register_event_handler(self, event_handler):
+        """
+        `event_handler`: event handler which will get pygame events.
+        """
         if (event_handler not in self._event_handlers):
             self._event_handlers.append(event_handler)
 
     def step(self):
+        """
+        Method that performs the dispatching.
+        """
         events = pygame.event.get()
         for event_handler in self._event_handlers:
             event_handler.handle_events(events)
