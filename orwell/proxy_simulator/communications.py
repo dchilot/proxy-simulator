@@ -56,6 +56,9 @@ class BaseEventHandler(object):
 
 
 class TankEventHandler(BaseEventHandler):
+    """
+    Event handlers that convert key pressed to understandble messages.
+    """
     def __init__(self, robot_descriptor):
         self._robot_descriptor = robot_descriptor
         self._left = 0
@@ -64,20 +67,28 @@ class TankEventHandler(BaseEventHandler):
         self._fire2 = False
 
     def _key_down(self, key):
-        if (key == pygame.K_q):
+        if (pygame.K_q == key):
             self._left = 1
-        elif (key == pygame.K_a):
+        elif (pygame.K_a == key):
             self._left = -1
-        elif (key == pygame.K_e):
+        elif (pygame.K_e == key):
             self._right = 1
-        elif (key == pygame.K_d):
+        elif (pygame.K_d == key):
             self._right = -1
+        elif (pygame.K_i == key):
+            self._fire1 = True
+        elif (pygame.K_o == key):
+            self._fire2 = True
 
     def _key_up(self, key):
         if (key in (pygame.K_q, pygame.K_a)):
             self._left = 0.0
         elif (key in (pygame.K_e, pygame.K_d)):
             self._right = 0.0
+        elif (pygame.K_i == key):
+            self._fire1 = False
+        elif (pygame.K_o == key):
+            self._fire2 = False
 
     def get_messages(self):
         return [self._robot_descriptor.get_input_message(
@@ -171,13 +182,16 @@ class CombinedDispatcher(Broadcaster):
         last_limit = start_time + datetime.timedelta(milliseconds=10)
         string = None
         #for _ in range(10):
-        while (True):
-            if (datetime.datetime.now() > last_limit):
-                break
+        now = datetime.datetime.now()
+        #print 'now =', now
+        #print 'last_limit =', last_limit
+        #print "(now <= last_limit) =", (now <= last_limit)
+        while (now <= last_limit):
             try:
                 string = self._receiver_socket.recv(flags=zmq.DONTWAIT)
+                string = self._receiver_socket.recv()
                 if ((self._string is None) or (string != self._string)):
-                    print "received message:" + string
+                    print "received message:" + repr(string)
                     self._string = string
                 else:
                     sys.stdout.write('.')
@@ -185,6 +199,9 @@ class CombinedDispatcher(Broadcaster):
                 #print e
                 #time.sleep(0.001)
                 pass
+            now = datetime.datetime.now()
+        #else:
+            #print "Not going in the loop"
         if (self._string is not None):
             self.queue([self._string])
         self.broadcast()

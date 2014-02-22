@@ -1,6 +1,7 @@
 import zmq
 import argparse
 import pygame
+import time
 import orwell.proxy_simulator.tanks as tanks
 import orwell.proxy_simulator.communications as communications
 
@@ -14,13 +15,20 @@ class Quitter(communications.BaseEventHandler):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--port", dest="port", help="The port to publish to.",
-                        default=5556, type=int)
+    parser.add_argument(
+            "--port", dest="port", help="The port to publish to.",
+            default=5556, type=int)
+    parser.add_argument(
+        "--address", dest="address",
+        help="The address used to bind.",
+        default="*", type=str)
     arguments = parser.parse_args()
     port = arguments.port
+    address = arguments.address
     context = zmq.Context()
     socket = context.socket(zmq.PUB)
-    socket.bind("tcp://127.0.0.1:%i" % port)
+    socket.setsockopt(zmq.LINGER, 10)
+    socket.bind("tcp://%s:%i" % (address, port))
     messengers = []
     descriptor = tanks.TankDescriptor(0)
     #robot = tanks.Tank(descriptor)
@@ -40,11 +48,12 @@ def main():
             for message in messenger.get_messages():
                 new_str = str(message)
                 if (previous_str != new_str):
-                    print "send message:", new_str
+                    print "send message:", repr(new_str)
                     previous_str = new_str
                 socket.send(message)
         #clock.tick(1 / 0.05)
         clock.tick(40)
+        #time.sleep(0.5)
 
 
 if ('__main__' == __name__):
