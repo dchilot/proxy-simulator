@@ -1,5 +1,4 @@
 # generate python code for the protobuff definition
-protoc -I=messages --python_out=orwell/proxy_simulator/ messages/version1.proto
 is_module=orwell/messages/__init__.py
 if [ ! -e "$is_module" ] ; then
 	mkdir -p orwell/messages
