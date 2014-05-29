@@ -45,7 +45,7 @@ class BaseTank(object):
         if (self._robot_descriptor.recipient == recipient):
             if ("Input" == message_type):
                 left, right, self._fire1, self._fire2 = \
-                        self._robot_descriptor.get_input(payload)
+                    self._robot_descriptor.get_input(payload)
                 self.velocity_left = 10 * left
                 self.velocity_right = 10 * right
 
@@ -144,8 +144,10 @@ class Tank(BaseTank):
             wheel_mass = ode.Mass()
             wheel_mass.setCylinder(density, 1, radius, height)
             right_wheel_body.setMass(wheel_mass)
-            right_wheel_geom = ode.GeomCylinder(world.space, radius=radius,
-                                               length=height)
+            right_wheel_geom = ode.GeomCylinder(
+                world.space,
+                radius=radius,
+                length=height)
             right_wheel_geom.setBody(right_wheel_body)
             right_wheel_body.setRotation((0, 0, 1,
                                           0, 1, 0,

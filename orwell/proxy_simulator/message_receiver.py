@@ -16,11 +16,11 @@ class Quitter(communications.BaseEventHandler):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-            "--port", dest="port", help="The port to subscribe to.",
-            default=5556, type=int)
+        "--port", dest="port", help="The port to subscribe to.",
+        default=5556, type=int)
     parser.add_argument(
         "--address", dest="address",
-        help="The address used to bind.",
+        help="The address to connect to.",
         default="127.0.0.1", type=str)
     arguments = parser.parse_args()
     address = arguments.address

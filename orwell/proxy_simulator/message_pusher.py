@@ -14,9 +14,8 @@ class Quitter(communications.BaseEventHandler):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--port", dest="port", help="The port to publish to.",
-        default=5556, type=int)
+    parser.add_argument("--port", dest="port", help="The port to publish to.",
+                        default=5556, type=int)
     parser.add_argument(
         "--address", dest="address",
         help="The address used to bind.",
@@ -25,9 +24,8 @@ def main():
     port = arguments.port
     address = arguments.address
     context = zmq.Context()
-    socket = context.socket(zmq.PUB)
-    socket.setsockopt(zmq.LINGER, 10)
-    socket.bind("tcp://%s:%i" % (address, port))
+    socket = context.socket(zmq.PUSH)
+    socket.connect("tcp://%s:%i" % (address, port))
     messengers = []
     descriptor = tanks.TankDescriptor(0)
     #robot = tanks.Tank(descriptor)
@@ -35,12 +33,13 @@ def main():
     messengers.append(robot_event_handler)
     messengers.append(Quitter())
     pygame.init()
-    pygame.display.set_mode((640, 480))
+    screen = pygame.display.set_mode((640, 480))
     pygame.display.set_caption('Message shooter')
     pygame.mouse.set_visible(False)
     clock = pygame.time.Clock()
     previous_str = ""
     while (True):
+    #if (True):
         events = pygame.event.get()
         for messenger in messengers:
             messenger.handle_events(events)
@@ -51,8 +50,8 @@ def main():
                     previous_str = new_str
                 socket.send(message)
         #clock.tick(1 / 0.05)
-        clock.tick(40)
-        #time.sleep(0.5)
+        #clock.tick(40)
+        pygame.time.delay(4000)
 
 
 if ('__main__' == __name__):

@@ -189,13 +189,14 @@ class CombinedDispatcher(Broadcaster):
         while (now <= last_limit):
             try:
                 string = self._receiver_socket.recv(flags=zmq.DONTWAIT)
-                string = self._receiver_socket.recv()
+                #string = self._receiver_socket.recv()
                 if ((self._string is None) or (string != self._string)):
                     print "received message:" + repr(string)
                     self._string = string
                 else:
                     sys.stdout.write('.')
-            except zmq.ZMQError as e:
+            except zmq.ZMQError:
+            #except zmq.ZMQError as e:
                 #print e
                 #time.sleep(0.001)
                 pass
