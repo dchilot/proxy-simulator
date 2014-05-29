@@ -1,7 +1,9 @@
 import ode
 import math
 import orwell.proxy_simulator.maths as maths
-import orwell.messages.controller_pb2 as pb_messages
+import orwell.messages.controller_pb2 as pb_controller
+import orwell.messages.server_game_pb2 as pb_server_game
+import orwell.messages.robot_pb2 as pb_robot
 
 
 class BaseTank(object):
@@ -42,12 +44,15 @@ class BaseTank(object):
             right_wheel_joint.setParam(ode.ParamVel, self._velocity_right)
 
     def handle_message(self, recipient, message_type, payload):
+        #print "handle_message for", recipient, "of type", message_type
         if (self._robot_descriptor.recipient == recipient):
             if ("Input" == message_type):
                 left, right, self._fire1, self._fire2 = \
                     self._robot_descriptor.get_input(payload)
                 self.velocity_left = 10 * left
                 self.velocity_right = 10 * right
+            elif ("Registered" == message_type):
+                self._robot_descriptor.process_registered(payload)
 
     @property
     def camera(self):
@@ -181,18 +186,36 @@ class TankDescriptor(object):
     Handles the messaging aspects of the tanks. There will be code to
     factorise when more robots are added, and probably some reorganisation.
     """
-    def __init__(self, robot_id):
-        self._robot_id = robot_id
-        self._recipient = "TANK_%i" % self._robot_id
+    def __init__(self, temporary_robot_id):
+        self._temporary_robot_id = temporary_robot_id
+        self._robot_id = None
+        self.team = None
+        self._registered = False
 
     @property
     def recipient(self):
-        return self._recipient
+        return self._robot_id or self._temporary_robot_id
+
+    def get_register_message(self):
+        message = pb_robot.Register()
+        message.temporary_robot_id = self._temporary_robot_id
+        message.video_port = 0
+        message.video_address = "None"
+        payload = message.SerializeToString()
+        return self.recipient + " Register " + payload
+
+    def process_registered(self, payload):
+        message = pb_server_game.Registered()
+        message.ParseFromString(payload)
+        if (message.robot_id):
+            self._robot_id = message.robot_id
+            self._team = message.team
+            self._registered = True
 
     def get_input_message(self, left, right, fire1, fire2):
         assert(-1 <= left <= 1)
         assert(-1 <= right <= 1)
-        message = pb_messages.Input()
+        message = pb_controller.Input()
         message.move.left = left
         message.move.right = right
         message.fire.weapon1 = fire1
@@ -201,7 +224,7 @@ class TankDescriptor(object):
         return self.recipient + " Input " + payload
 
     def get_input(self, payload):
-        message = pb_messages.Input()
+        message = pb_controller.Input()
         message.ParseFromString(payload)
         assert(-1 <= message.move.left <= 1)
         assert(-1 <= message.move.right <= 1)

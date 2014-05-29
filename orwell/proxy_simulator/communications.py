@@ -102,6 +102,7 @@ class Broadcaster(object):
     def __init__(self):
         self._listeners = []
         self._messages = []
+        self._event_handlers = []
 
     def register_listener(self, listener):
         """
@@ -110,6 +111,13 @@ class Broadcaster(object):
         """
         if (listener not in self._listeners):
             self._listeners.append(listener)
+
+    def register_event_handler(self, event_handler):
+        """
+        `event_handler`: event handler which will get pygame events.
+        """
+        if (event_handler not in self._event_handlers):
+            self._event_handlers.append(event_handler)
 
     def queue(self, messages):
         """
@@ -135,11 +143,6 @@ class Broadcaster(object):
 class LocalEventDispatcher(Broadcaster):
     def __init__(self):
         super(LocalEventDispatcher, self).__init__()
-        self._event_handlers = []
-
-    def register_event_handler(self, event_handler):
-        if (event_handler not in self._event_handlers):
-            self._event_handlers.append(event_handler)
 
     def step(self):
         events = pygame.event.get()
@@ -159,16 +162,8 @@ class CombinedDispatcher(Broadcaster):
         `receiver_socket`: zmq socket used to receive messages.
         """
         super(CombinedDispatcher, self).__init__()
-        self._event_handlers = []
         self._receiver_socket = receiver_socket
         self._string = None
-
-    def register_event_handler(self, event_handler):
-        """
-        `event_handler`: event handler which will get pygame events.
-        """
-        if (event_handler not in self._event_handlers):
-            self._event_handlers.append(event_handler)
 
     def step(self):
         """

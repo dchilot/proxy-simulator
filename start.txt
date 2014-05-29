@@ -1,0 +1,4 @@
+# start the proxy itself with message receiver and a controller to send Input messages.
+python orwell/proxy_simulator/message_receiver.py --port 9000 --push-port 9001 --push-address 127.0.0.1 &
+python orwell/proxy_simulator/message_shooter.py --port 9001 &
+# there is a bug and zmq hangs ... manual kill will be needed

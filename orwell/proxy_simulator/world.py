@@ -442,10 +442,7 @@ class World(communications.BaseEventHandler):
 
             # Limit the FPS.
             clock.tick(self.fps)
-            # The approach works if the simulation could run faster than it
-            # is actally limited to which should work here because it is simple
-            # enough and in any case it is a little slower, it is not very
-            # important as we are only dealing with a simulator.
+            # there is probably a better way to do this
 
     def add(self, robot):
         self._robots.append(robot)
