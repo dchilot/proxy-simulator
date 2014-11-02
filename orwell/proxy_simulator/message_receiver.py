@@ -19,7 +19,7 @@ def main():
     parser.add_argument(
         "--port", dest="port",
         help="The port to connect to to receive messages from the server.",
-        default=5556, type=int)
+        default=9000, type=int)
     parser.add_argument(
         "--address", dest="address",
         help="The address to connect to to receive messages from the server.",
@@ -27,7 +27,7 @@ def main():
     parser.add_argument(
         "--push-port",
         help="The port to connect to to send messages to the server.",
-        default=5556, type=int)
+        default=9001, type=int)
     parser.add_argument(
         "--push-address",
         help="The address to connect to to send messages to the server.",
@@ -64,7 +64,9 @@ def main():
     broadcaster.register_listener(test_world)
     # send request to register the robot
     # // maybe this could be done in test_world.run()
-    push_socket.send(descriptor.get_register_message())
+    register_message = descriptor.get_register_message()
+    print "regiter_message =", repr(register_message)
+    push_socket.send(register_message)
     test_world.run()
 
 

@@ -36,6 +36,10 @@ def main():
         help="The port to subscribe to.",
         default=9000,
         type=int)
+    parser.add_argument(
+        "--subscriber-address", dest="subscriber_address",
+        help="The address used to connect.",
+        default="127.0.0.1", type=str)
     arguments = parser.parse_args()
     port = arguments.port
     address = arguments.address
@@ -50,15 +54,15 @@ def main():
         message = pb_controller.Hello()
         message.name = "Nono"
         message.ready = True
-        message.port = 0
-        message.ip = temporary_robot_id
         payload = message.SerializeToString()
         push_socket.send(temporary_robot_id + " Hello " + payload)
         subscribe_socket = context.socket(zmq.SUB)
         subscribe_socket.setsockopt(zmq.LINGER, 0)
         subscribe_socket.setsockopt(zmq.SUBSCRIBE, temporary_robot_id)
-        subscribe_socket.connect(
-            "tcp://%s:%i" % (address, arguments.subscriber_port))
+        full_address = "tcp://%s:%i" % (
+            arguments.subscriber_address, arguments.subscriber_port)
+        #print "full_address =", full_address
+        subscribe_socket.connect(full_address)
         reply = subscribe_socket.recv()
         dest, message_type, payload = reply.split(" ", 2)
         if ("Welcome" == message_type):

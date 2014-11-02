@@ -49,10 +49,14 @@ class BaseTank(object):
             if ("Input" == message_type):
                 left, right, self._fire1, self._fire2 = \
                     self._robot_descriptor.get_input(payload)
+                #print "left:", left, "right:", right
                 self.velocity_left = 10 * left
                 self.velocity_right = 10 * right
             elif ("Registered" == message_type):
                 self._robot_descriptor.process_registered(payload)
+        #else:
+            #print "wrong recipient (%s), expected %s" % (
+                    #recipient, self._robot_descriptor.recipient)
 
     @property
     def camera(self):
@@ -187,7 +191,7 @@ class TankDescriptor(object):
     factorise when more robots are added, and probably some reorganisation.
     """
     def __init__(self, temporary_robot_id):
-        self._temporary_robot_id = temporary_robot_id
+        self._temporary_robot_id = str(temporary_robot_id)
         self._robot_id = None
         self.team = None
         self._registered = False
@@ -199,8 +203,8 @@ class TankDescriptor(object):
     def get_register_message(self):
         message = pb_robot.Register()
         message.temporary_robot_id = self._temporary_robot_id
-        message.video_port = 0
-        message.video_address = "None"
+        message.video_url = "None"
+        message.image = "None"
         payload = message.SerializeToString()
         return self.recipient + " Register " + payload
 
